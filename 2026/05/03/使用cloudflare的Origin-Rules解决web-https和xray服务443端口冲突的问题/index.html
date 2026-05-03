@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"celeron633.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="最近新开了一台AWS的LightSail实例（新加坡，512M，每月5美刀），由于xray服务使用了443端口，我又有需求需要在同一个示例上面运行两个web服务，而且均需要提供https访问，一个是帮朋友制作的一个小型门户网站（基本上是静态的），另外一个是tvbox的订阅js文件，也是静态的，使用nginx的try_files功能实现。之前的想法是使用nginx的stream模块的ssl_prer">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用cloudflare的Origin Rules解决web https和xray服务443端口冲突的问题">
+<meta property="og:url" content="http://celeron633.github.io/2026/05/03/%E4%BD%BF%E7%94%A8cloudflare%E7%9A%84Origin-Rules%E8%A7%A3%E5%86%B3web-https%E5%92%8Cxray%E6%9C%8D%E5%8A%A1443%E7%AB%AF%E5%8F%A3%E5%86%B2%E7%AA%81%E7%9A%84%E9%97%AE%E9%A2%98/index.html">
+<meta property="og:site_name" content="celeron633&#39;s Blog">
+<meta property="og:description" content="最近新开了一台AWS的LightSail实例（新加坡，512M，每月5美刀），由于xray服务使用了443端口，我又有需求需要在同一个示例上面运行两个web服务，而且均需要提供https访问，一个是帮朋友制作的一个小型门户网站（基本上是静态的），另外一个是tvbox的订阅js文件，也是静态的，使用nginx的try_files功能实现。之前的想法是使用nginx的stream模块的ssl_prer">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://celeron633.github.io/images/2026-05-03_17-08.png">
+<meta property="og:image" content="http://celeron633.github.io/images/2026-05-03_17-09.png">
+<meta property="og:image" content="http://celeron633.github.io/images/2026-05-03_17-03.png">
+<meta property="og:image" content="http://celeron633.github.io/images/2026-05-03_17-04.png">
+<meta property="og:image" content="http://celeron633.github.io/images/2026-05-03_17-05.png">
+<meta property="article:published_time" content="2026-05-03T08:18:10.000Z">
+<meta property="article:modified_time" content="2026-05-03T09:15:49.611Z">
+<meta property="article:author" content="celeron633">
+<meta property="article:tag" content="cloudflare">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://celeron633.github.io/images/2026-05-03_17-08.png">
+
+<link rel="canonical" href="http://celeron633.github.io/2026/05/03/%E4%BD%BF%E7%94%A8cloudflare%E7%9A%84Origin-Rules%E8%A7%A3%E5%86%B3web-https%E5%92%8Cxray%E6%9C%8D%E5%8A%A1443%E7%AB%AF%E5%8F%A3%E5%86%B2%E7%AA%81%E7%9A%84%E9%97%AE%E9%A2%98/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>使用cloudflare的Origin Rules解决web https和xray服务443端口冲突的问题 | celeron633's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">celeron633's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://celeron633.github.io/2026/05/03/%E4%BD%BF%E7%94%A8cloudflare%E7%9A%84Origin-Rules%E8%A7%A3%E5%86%B3web-https%E5%92%8Cxray%E6%9C%8D%E5%8A%A1443%E7%AB%AF%E5%8F%A3%E5%86%B2%E7%AA%81%E7%9A%84%E9%97%AE%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="celeron633">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="celeron633's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          使用cloudflare的Origin Rules解决web https和xray服务443端口冲突的问题
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-05-03 16:18:10 / 修改时间：17:15:49" itemprop="dateCreated datePublished" datetime="2026-05-03T16:18:10+08:00">2026-05-03</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">技术分享</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近新开了一台AWS的LightSail实例（新加坡，512M，每月5美刀），由于xray服务使用了443端口，我又有需求需要在同一个示例上面运行两个web服务，而且均需要提供https访问，一个是帮朋友制作的一个小型门户网站（基本上是静态的），另外一个是tvbox的订阅js文件，也是静态的，使用nginx的try_files功能实现。<br>之前的想法是使用nginx的stream模块的ssl_preread功能，nginx侦听443端口，然后xray跑在1443，然后两个web服务都跑在2443端口，nginx根据域名（server_name）来区分访问哪个web服务。由于Lightsail的示例配置很低，这样做无疑不是一个好选择。</p>
+<span id="more"></span>
+<p>后面我有了两个想法：</p>
+<p><strong>方法1：</strong><br>两个web服务都不用https，只使用http，然后开启cloudflare的Flexible SSL功能，cloudflare和用户之间是https，cloudflare和服务器之间是http，这样就可以避免443端口冲突的问题了。<br><strong>方法2：</strong><br>xray侦听443端口，然后fallback到web服务器的80和81端口，81是h2c的端口，80是http的端口。</p>
+<p>但是这两个方法都存在缺陷，第一个方法80端口可以被直接http访问，url有泄露风险，虽然可以通过修改cloudflare的规则来实现http强制跳转https，但是http那个请求还是会泄露url。第二个方法则更加麻烦，由于门户网站使用的域名和代理使用的不一样，用xray fallback直接导致证书错误，而且由于ALPN的缘故，每个域名还要配置两个fallback规则，也不是很理想的做法。</p>
+<p>经过一番搜索，我发现了另外一个不错的方法：</p>
+<ol>
+<li>xray侦听443端口，web服务侦听8443端口，启用SSL。</li>
+<li>cloudflare的SSL&#x2F;TLS设置为Full。</li>
+<li>对于需要走CDN代理的域名，打开橙色的云朵，开启代理。</li>
+<li>配置cloudflare的Origin Rules，设置当访问某个域名时，cloudflare会将请求转发到服务器的8443端口。<br>这样就可以解决443端口冲突的问题，同时也能保证web服务的安全性和性能。</li>
+</ol>
+<p>具体配置的方法如下：</p>
+<ol>
+<li><p>导航到规则tab，选择Origin Rules，点击创建规则：<br><img src="/images/2026-05-03_17-08.png"><br><img src="/images/2026-05-03_17-09.png"></p>
+</li>
+<li><p>对于要从443回源到8443的域名进行类似如下图的配置：<br><img src="/images/2026-05-03_17-03.png"><br>要是界面不好点，直接修改表达式方便点，大致就是如果HOST匹配，然后又是SSL协议。</p>
+</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(http.host eq &quot;tvbox.xxxxx.top&quot; and ssl) or (http.host eq &quot;zj.xxxxx.top&quot; and ssl)</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>转发到8443端口：<br><img src="/images/2026-05-03_17-04.png"></li>
+</ol>
+<p>保存后退出，检查规则已经生效：<br><img src="/images/2026-05-03_17-05.png"></p>
+<p>此时访问这个域名的https（默认443端口）就会被cloudflare转发到服务器的8443端口，而xray服务仍然可以正常使用443端口提供服务了。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>celeron633
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://celeron633.github.io/2026/05/03/%E4%BD%BF%E7%94%A8cloudflare%E7%9A%84Origin-Rules%E8%A7%A3%E5%86%B3web-https%E5%92%8Cxray%E6%9C%8D%E5%8A%A1443%E7%AB%AF%E5%8F%A3%E5%86%B2%E7%AA%81%E7%9A%84%E9%97%AE%E9%A2%98/" title="使用cloudflare的Origin Rules解决web https和xray服务443端口冲突的问题">http://celeron633.github.io/2026/05/03/使用cloudflare的Origin-Rules解决web-https和xray服务443端口冲突的问题/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/cloudflare/" rel="tag"># cloudflare</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/05/03/hello-world/" rel="prev" title="Hello World">
+      <i class="fa fa-chevron-left"></i> Hello World
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">celeron633</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">2</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">celeron633</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

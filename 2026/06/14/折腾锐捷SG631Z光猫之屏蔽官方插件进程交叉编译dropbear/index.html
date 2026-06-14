@@ -20,28 +20,36 @@
     var CONFIG = {"hostname":"celeron633.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta property="og:type" content="website">
-<meta property="og:title" content="celeron633 の Blog">
-<meta property="og:url" content="http://celeron633.github.io/index.html">
+  <meta name="description" content="折腾中国联通 ZTE SG631Z 光猫：屏蔽官方插件进程 + 交叉编译 dropbear &#x2F; mtd-utils 记录一次对中国联通定制 ZTE SG631Z（OpenWRT 衍生固件，kernel 5.15）光猫的”减负”过程：把厂商塞进来的 DPI &#x2F; 应用框架插件干掉、搞清楚它为什么”杀不死、删不掉、格式化还原回来”，最后用 C 写了两个 daemon 桩进程替换官方二">
+<meta property="og:type" content="article">
+<meta property="og:title" content="折腾锐捷SG631Z光猫之屏蔽官方插件进程交叉编译dropbear">
+<meta property="og:url" content="http://celeron633.github.io/2026/06/14/%E6%8A%98%E8%85%BE%E9%94%90%E6%8D%B7SG631Z%E5%85%89%E7%8C%AB%E4%B9%8B%E5%B1%8F%E8%94%BD%E5%AE%98%E6%96%B9%E6%8F%92%E4%BB%B6%E8%BF%9B%E7%A8%8B%E4%BA%A4%E5%8F%89%E7%BC%96%E8%AF%91dropbear/index.html">
 <meta property="og:site_name" content="celeron633 の Blog">
+<meta property="og:description" content="折腾中国联通 ZTE SG631Z 光猫：屏蔽官方插件进程 + 交叉编译 dropbear &#x2F; mtd-utils 记录一次对中国联通定制 ZTE SG631Z（OpenWRT 衍生固件，kernel 5.15）光猫的”减负”过程：把厂商塞进来的 DPI &#x2F; 应用框架插件干掉、搞清楚它为什么”杀不死、删不掉、格式化还原回来”，最后用 C 写了两个 daemon 桩进程替换官方二">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-06-14T05:18:10.000Z">
+<meta property="article:modified_time" content="2026-06-14T05:17:05.738Z">
 <meta property="article:author" content="celeron633">
+<meta property="article:tag" content="OpenWRT">
+<meta property="article:tag" content="dropbear">
+<meta property="article:tag" content="mtd-utils">
+<meta property="article:tag" content="光猫">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://celeron633.github.io/">
+<link rel="canonical" href="http://celeron633.github.io/2026/06/14/%E6%8A%98%E8%85%BE%E9%94%90%E6%8D%B7SG631Z%E5%85%89%E7%8C%AB%E4%B9%8B%E5%B1%8F%E8%94%BD%E5%AE%98%E6%96%B9%E6%8F%92%E4%BB%B6%E8%BF%9B%E7%A8%8B%E4%BA%A4%E5%8F%89%E7%BC%96%E8%AF%91dropbear/">
 
 
 <script id="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome : true,
-    isPost : false,
+    isHome : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>celeron633 の Blog</title>
+  <title>折腾锐捷SG631Z光猫之屏蔽官方插件进程交叉编译dropbear | celeron633 の Blog</title>
   
 
 
@@ -139,9 +147,10 @@
         <div class="content-wrap">
           
 
-          <div class="content index posts-expand">
+          <div class="content post posts-expand">
             
-      
+
+    
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
@@ -157,10 +166,9 @@
       <meta itemprop="name" content="celeron633 の Blog">
     </span>
       <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/06/14/%E6%8A%98%E8%85%BE%E9%94%90%E6%8D%B7SG631Z%E5%85%89%E7%8C%AB%E4%B9%8B%E5%B1%8F%E8%94%BD%E5%AE%98%E6%96%B9%E6%8F%92%E4%BB%B6%E8%BF%9B%E7%A8%8B%E4%BA%A4%E5%8F%89%E7%BC%96%E8%AF%91dropbear/" class="post-title-link" itemprop="url">折腾锐捷SG631Z光猫之屏蔽官方插件进程交叉编译dropbear</a>
-        </h2>
+        <h1 class="post-title" itemprop="name headline">
+          折腾锐捷SG631Z光猫之屏蔽官方插件进程交叉编译dropbear
+        </h1>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -197,7 +205,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h1 id="折腾中国联通-ZTE-SG631Z-光猫：屏蔽官方插件进程-交叉编译-dropbear-mtd-utils"><a href="#折腾中国联通-ZTE-SG631Z-光猫：屏蔽官方插件进程-交叉编译-dropbear-mtd-utils" class="headerlink" title="折腾中国联通 ZTE SG631Z 光猫：屏蔽官方插件进程 + 交叉编译 dropbear &#x2F; mtd-utils"></a>折腾中国联通 ZTE SG631Z 光猫：屏蔽官方插件进程 + 交叉编译 dropbear &#x2F; mtd-utils</h1><blockquote>
+        <h1 id="折腾中国联通-ZTE-SG631Z-光猫：屏蔽官方插件进程-交叉编译-dropbear-mtd-utils"><a href="#折腾中国联通-ZTE-SG631Z-光猫：屏蔽官方插件进程-交叉编译-dropbear-mtd-utils" class="headerlink" title="折腾中国联通 ZTE SG631Z 光猫：屏蔽官方插件进程 + 交叉编译 dropbear &#x2F; mtd-utils"></a>折腾中国联通 ZTE SG631Z 光猫：屏蔽官方插件进程 + 交叉编译 dropbear &#x2F; mtd-utils</h1><blockquote>
 <p>记录一次对中国联通定制 ZTE SG631Z（OpenWRT 衍生固件，kernel 5.15）光猫的”减负”过程：<br>把厂商塞进来的 DPI &#x2F; 应用框架插件干掉、搞清楚它为什么”杀不死、删不掉、格式化还原回来”，<br>最后用 C 写了两个 daemon 桩进程替换官方二进制，并交叉编译了 dropbear 和 mtd-utils。</p>
 <p>全程在一台完全离线的设备上完成，靠 telnet 和网页后台的一个 shell。</p>
 </blockquote>
@@ -463,166 +471,36 @@
 <hr>
 <p><em>本文记录的是对自有设备的离线研究与定制，仅供学习交流。操作有变砖风险，务必先备份、保留 telnet&#x2F;串口&#x2F;网页 shell 等回退手段。</em></p>
 
-      
     </div>
 
     
     
     
+
       <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
+          <div class="post-tags">
+              <a href="/tags/OpenWRT/" rel="tag"># OpenWRT</a>
+              <a href="/tags/%E5%85%89%E7%8C%AB/" rel="tag"># 光猫</a>
+              <a href="/tags/dropbear/" rel="tag"># dropbear</a>
+              <a href="/tags/mtd-utils/" rel="tag"># mtd-utils</a>
+          </div>
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://celeron633.github.io/2026/05/03/%E4%BD%BF%E7%94%A8cloudflare%E7%9A%84Origin-Rules%E8%A7%A3%E5%86%B3web-https%E5%92%8Cxray%E6%9C%8D%E5%8A%A1443%E7%AB%AF%E5%8F%A3%E5%86%B2%E7%AA%81%E7%9A%84%E9%97%AE%E9%A2%98/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="celeron633">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="celeron633 の Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/05/03/%E4%BD%BF%E7%94%A8cloudflare%E7%9A%84Origin-Rules%E8%A7%A3%E5%86%B3web-https%E5%92%8Cxray%E6%9C%8D%E5%8A%A1443%E7%AB%AF%E5%8F%A3%E5%86%B2%E7%AA%81%E7%9A%84%E9%97%AE%E9%A2%98/" class="post-title-link" itemprop="url">使用cloudflare的Origin Rules解决web https和xray服务443端口冲突的问题</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2026-05-03 16:18:10 / 修改时间：17:15:49" itemprop="dateCreated datePublished" datetime="2026-05-03T16:18:10+08:00">2026-05-03</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/" itemprop="url" rel="index"><span itemprop="name">技术分享</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%8A%80%E6%9C%AF%E5%88%86%E4%BA%AB/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>最近新开了一台AWS的LightSail实例（新加坡，512M，每月5美刀），由于xray服务使用了443端口，我又有需求需要在同一个示例上面运行两个web服务，而且均需要提供https访问，一个是帮朋友制作的一个小型门户网站（基本上是静态的），另外一个是tvbox的订阅js文件，也是静态的，使用nginx的try_files功能实现。<br>之前的想法是使用nginx的stream模块的ssl_preread功能，nginx侦听443端口，然后xray跑在1443，然后两个web服务都跑在2443端口，nginx根据域名（server_name）来区分访问哪个web服务。由于Lightsail的示例配置很低，这样做无疑不是一个好选择。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2026/05/03/%E4%BD%BF%E7%94%A8cloudflare%E7%9A%84Origin-Rules%E8%A7%A3%E5%86%B3web-https%E5%92%8Cxray%E6%9C%8D%E5%8A%A1443%E7%AB%AF%E5%8F%A3%E5%86%B2%E7%AA%81%E7%9A%84%E9%97%AE%E9%A2%98/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
         
-      
-    </div>
 
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://celeron633.github.io/2026/05/03/hello-world/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="celeron633">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="celeron633 の Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/05/03/hello-world/" class="post-title-link" itemprop="url">Hello World</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2026-05-03 15:59:51 / 修改时间：17:15:59" itemprop="dateCreated datePublished" datetime="2026-05-03T15:59:51+08:00">2026-05-03</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2026/05/03/hello-world/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
         
-      
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/05/03/%E4%BD%BF%E7%94%A8cloudflare%E7%9A%84Origin-Rules%E8%A7%A3%E5%86%B3web-https%E5%92%8Cxray%E6%9C%8D%E5%8A%A1443%E7%AB%AF%E5%8F%A3%E5%86%B2%E7%AA%81%E7%9A%84%E9%97%AE%E9%A2%98/" rel="prev" title="使用cloudflare的Origin Rules解决web https和xray服务443端口冲突的问题">
+      <i class="fa fa-chevron-left"></i> 使用cloudflare的Origin Rules解决web https和xray服务443端口冲突的问题
+    </a></div>
+      <div class="post-nav-item"></div>
     </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
       </footer>
+    
   </article>
   
   
-  
-
-
   
 
 
@@ -675,6 +553,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8A%98%E8%85%BE%E4%B8%AD%E5%9B%BD%E8%81%94%E9%80%9A-ZTE-SG631Z-%E5%85%89%E7%8C%AB%EF%BC%9A%E5%B1%8F%E8%94%BD%E5%AE%98%E6%96%B9%E6%8F%92%E4%BB%B6%E8%BF%9B%E7%A8%8B-%E4%BA%A4%E5%8F%89%E7%BC%96%E8%AF%91-dropbear-mtd-utils"><span class="nav-number">1.</span> <span class="nav-text">折腾中国联通 ZTE SG631Z 光猫：屏蔽官方插件进程 + 交叉编译 dropbear &#x2F; mtd-utils</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#0-%E7%8E%AF%E5%A2%83%E4%B8%8E%E7%9B%AE%E6%A0%87"><span class="nav-number">1.1.</span> <span class="nav-text">0. 环境与目标</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%85%88%E6%90%9E%E6%B8%85%E6%A5%9A%E5%90%AF%E5%8A%A8%E9%93%BE"><span class="nav-number">1.2.</span> <span class="nav-text">1. 先搞清楚启动链</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E4%B8%BA%E4%BB%80%E4%B9%88%E2%80%9D%E6%A0%BC%E5%BC%8F%E5%8C%96-mtd12-mtd13-%E6%B2%A1%E7%94%A8%E3%80%81%E4%BC%9A%E8%A2%AB%E8%BF%98%E5%8E%9F%E2%80%9D"><span class="nav-number">1.3.</span> <span class="nav-text">2. 为什么”格式化 mtd12&#x2F;mtd13 没用、会被还原”</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mtd12%EF%BC%88ubifs%EF%BC%8C-opt-cu-apps%EF%BC%8C%E8%BF%90%E8%A1%8C%E6%9C%9F%E6%9A%82%E5%AD%98%EF%BC%89"><span class="nav-number">1.3.1.</span> <span class="nav-text">mtd12（ubifs，&#x2F;opt&#x2F;cu&#x2F;apps，运行期暂存）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#rootfs-%E6%98%AF%E5%8F%AA%E8%AF%BB%E7%9A%84-ubifs"><span class="nav-number">1.3.2.</span> <span class="nav-text">rootfs 是只读的 ubifs</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E8%A6%81%E6%9B%B4%E6%AD%A3%EF%BC%9Amtd12-13%E2%80%9D%E5%BC%84%E4%B8%8D%E6%8E%89%E2%80%9D%E6%98%AF-busybox-%E5%B7%A5%E5%85%B7%E7%9A%84%E9%94%85%EF%BC%8C%E4%B8%8D%E6%98%AF%E7%9C%9F%E6%93%A6%E4%B8%8D%E6%8E%89"><span class="nav-number">1.3.3.</span> <span class="nav-text">重要更正：mtd12&#x2F;13”弄不掉”是 busybox 工具的锅，不是真擦不掉</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-overlay-%E7%9A%84%E5%9D%91%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E2%80%9D%E6%94%B9%E4%BA%86-bin-%E9%87%8D%E5%90%AF%E5%B0%B1%E6%B2%A1%E4%BA%86%E2%80%9D"><span class="nav-number">1.4.</span> <span class="nav-text">3. overlay 的坑：为什么”改了 &#x2F;bin 重启就没了”</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%BA%E6%89%8B%E8%A7%A3%E5%86%B3%E4%B8%80%E4%B8%AA%E8%B0%9C%E9%A2%98%EF%BC%9Aoverlay-%E7%9A%84-upperdir-%E9%87%8C%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BC%9A%E6%9C%89%E4%B8%80%E5%A0%86%E4%BA%8C%E8%BF%9B%E5%88%B6%EF%BC%8C%E4%B8%94-sha1-%E5%92%8C%E5%BA%95%E5%B1%82%E4%B8%80%E6%A8%A1%E4%B8%80%E6%A0%B7%EF%BC%9F"><span class="nav-number">1.4.1.</span> <span class="nav-text">顺手解决一个谜题：overlay 的 upperdir 里为什么会有一堆二进制，且 sha1 和底层一模一样？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E5%AE%9A%E4%BD%8D%E7%9B%AE%E6%A0%87%E8%BF%9B%E7%A8%8B"><span class="nav-number">1.5.</span> <span class="nav-text">4. 定位目标进程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E5%B1%8F%E8%94%BD%E7%AD%96%E7%95%A5%EF%BC%9A%E6%8D%A2%E6%88%90%E2%80%9D%E6%A1%A9%E2%80%9D%EF%BC%8C%E8%80%8C%E4%B8%8D%E6%98%AF%E5%88%A0"><span class="nav-number">1.6.</span> <span class="nav-text">5. 屏蔽策略：换成”桩”，而不是删</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-%E7%AC%AC%E4%B8%80%E7%89%88%EF%BC%9Ashell-%E6%A1%A9"><span class="nav-number">1.6.1.</span> <span class="nav-text">5.1 第一版：shell 桩</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-%E7%AC%AC%E4%BA%8C%E7%89%88%EF%BC%9AC-%E6%A1%A9%EF%BC%88%E8%AE%A9-ps-%E6%98%BE%E7%A4%BA%E5%BE%97%E5%92%8C%E5%8E%9F%E7%89%88%E4%B8%80%E8%87%B4%EF%BC%89"><span class="nav-number">1.6.2.</span> <span class="nav-text">5.2 第二版：C 桩（让 ps 显示得和原版一致）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-%E4%B8%A4%E4%B8%AA-C-%E6%A1%A9%E6%BA%90%E7%A0%81%EF%BC%88daemon-%E7%89%88%EF%BC%89"><span class="nav-number">1.7.</span> <span class="nav-text">6. 两个 C 桩源码（daemon 版）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CuInformLoader-c"><span class="nav-number">1.7.1.</span> <span class="nav-text">CuInformLoader.c</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ufwmg-c"><span class="nav-number">1.7.2.</span> <span class="nav-text">ufwmg.c</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-%E4%BA%A4%E5%8F%89%E7%BC%96%E8%AF%91%E5%B7%A5%E5%85%B7%E9%93%BE"><span class="nav-number">1.8.</span> <span class="nav-text">7. 交叉编译工具链</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-%E4%BA%A4%E5%8F%89%E7%BC%96%E8%AF%91-dropbear%EF%BC%88%E8%BD%BB%E9%87%8F-SSH%EF%BC%89"><span class="nav-number">1.9.</span> <span class="nav-text">8. 交叉编译 dropbear（轻量 SSH）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E5%9D%91%EF%BC%9A%E7%99%BB%E5%BD%95%E4%B8%80%E7%9B%B4%E2%80%9Dpassword-error%E2%80%9D-%E2%80%94%E2%80%94-%E8%A6%81%E8%AE%A9-dropbear-%E8%AF%BB-etc-shadow"><span class="nav-number">1.9.1.</span> <span class="nav-text">关键坑：登录一直”password error” —— 要让 dropbear 读 &#x2F;etc&#x2F;shadow</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-%E4%BA%A4%E5%8F%89%E7%BC%96%E8%AF%91-mtd-utils%EF%BC%88ubiformat-nanddump-flash-erase-%E7%AD%89%EF%BC%89"><span class="nav-number">1.10.</span> <span class="nav-text">9. 交叉编译 mtd-utils（ubiformat &#x2F; nanddump &#x2F; flash_erase 等）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-%E6%8C%81%E4%B9%85%E5%8C%96%E8%90%BD%E5%9C%B0%EF%BC%9Abind-mount-%E6%94%B9-rootfs-%E7%9C%9F%E8%BA%AB"><span class="nav-number">1.11.</span> <span class="nav-text">10. 持久化落地：bind-mount 改 rootfs 真身</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CuInform-%E8%BF%98%E8%A6%81%E5%A0%B5%E4%BD%8F%E4%B8%80%E5%A4%84%E2%80%9D%E5%BC%80%E6%9C%BA%E9%87%8D%E6%96%B0%E6%8B%B7%E8%B4%9D%E2%80%9D"><span class="nav-number">1.11.1.</span> <span class="nav-text">CuInform 还要堵住一处”开机重新拷贝”</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81-%E8%AE%A9-pc-%E9%87%8D%E6%8B%89%E6%96%B0%E6%A1%A9"><span class="nav-number">1.11.2.</span> <span class="nav-text">验证 + 让 pc 重拉新桩</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%9E%E6%BB%9A"><span class="nav-number">1.11.3.</span> <span class="nav-text">回滚</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-%E8%B8%A9%E5%9D%91%E6%B8%85%E5%8D%95%EF%BC%88%E8%A1%80%E6%B3%AA%E6%80%BB%E7%BB%93%EF%BC%89"><span class="nav-number">1.12.</span> <span class="nav-text">11. 踩坑清单（血泪总结）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-%E6%9C%80%E5%90%8E%EF%BC%9A%E5%9B%BA%E4%BB%B6%E5%8D%87%E7%BA%A7%E4%BC%9A%E5%86%B2%E6%8E%89%E4%B8%80%E5%88%87"><span class="nav-number">1.13.</span> <span class="nav-text">12. 最后：固件升级会冲掉一切</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 

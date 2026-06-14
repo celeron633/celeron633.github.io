@@ -170,7 +170,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2026-06-14 13:18:10 / 修改时间：13:20:40" itemprop="dateCreated datePublished" datetime="2026-06-14T13:18:10+08:00">2026-06-14</time>
+              <time title="创建时间：2026-06-14 13:18:10 / 修改时间：16:29:42" itemprop="dateCreated datePublished" datetime="2026-06-14T13:18:10+08:00">2026-06-14</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -197,9 +197,9 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h1 id="折腾中国联通-ZTE-SG631Z-光猫：屏蔽官方插件进程-交叉编译-dropbear-mtd-utils"><a href="#折腾中国联通-ZTE-SG631Z-光猫：屏蔽官方插件进程-交叉编译-dropbear-mtd-utils" class="headerlink" title="折腾中国联通 ZTE SG631Z 光猫：屏蔽官方插件进程 + 交叉编译 dropbear &#x2F; mtd-utils"></a>折腾中国联通 ZTE SG631Z 光猫：屏蔽官方插件进程 + 交叉编译 dropbear &#x2F; mtd-utils</h1><blockquote>
-<p>记录一次对中国联通定制 ZTE SG631Z（OpenWRT 衍生固件，kernel 5.15）光猫的”减负”过程：<br>把厂商塞进来的 DPI &#x2F; 应用框架插件干掉、搞清楚它为什么”杀不死、删不掉、格式化还原回来”，<br>最后用 C 写了两个 daemon 桩进程替换官方二进制，并交叉编译了 dropbear 和 mtd-utils。</p>
-<p>全程在一台完全离线的设备上完成，靠 telnet 和网页后台的一个 shell。</p>
+          <h1 id="折腾中国联通定制的锐捷-SG631Z-光猫：屏蔽官方插件进程-交叉编译-dropbear-mtd-utils"><a href="#折腾中国联通定制的锐捷-SG631Z-光猫：屏蔽官方插件进程-交叉编译-dropbear-mtd-utils" class="headerlink" title="折腾中国联通定制的锐捷 SG631Z 光猫：屏蔽官方插件进程 + 交叉编译 dropbear &#x2F; mtd-utils"></a>折腾中国联通定制的锐捷 SG631Z 光猫：屏蔽官方插件进程 + 交叉编译 dropbear &#x2F; mtd-utils</h1><blockquote>
+<p>这台锐捷 SG631Z 是中国联通定制的光猫，Buildroot 衍生固件，kernel 4.19。厂商往里塞了 DPI 和应用框架两个插件，想把它们关掉。过程中顺带搞清楚了几个困扰我挺久的问题：插件为什么杀不死、文件为什么改了重启就没、mtd 分区为什么格式化完又自己长回来。最后是用 C 写了两个 daemon 桩替换掉官方二进制，另外交叉编译了 dropbear 和 mtd-utils。</p>
+<p>设备一直是离线的（没接 ISP），全程靠 telnet 和网页后台那个 shell 操作。记下来备忘，也给有同款设备的人参考。</p>
 </blockquote>
 <hr>
           <!--noindex-->
